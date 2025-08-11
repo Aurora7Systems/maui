@@ -125,6 +125,7 @@ namespace Microsoft.Maui.Media
 					}
 				});
 			}
+			Debug.WriteLine(options?.Locale?.Id + "<-ID:"); 
 
 			if (options?.Locale?.Language != null)
 			{
@@ -135,10 +136,17 @@ namespace Microsoft.Maui.Media
 					locale = new JavaLocale(options.Locale.Language);
 
 				tts.SetLanguage(locale);
+				//tts.SetVoice(options?.Locale?.Id);
 			}
 			else
 			{
 				SetDefaultLanguage();
+			}
+			if (!string.IsNullOrEmpty(options?.Locale?.Id) && tts?.Voices != null)
+			{
+				var voice = tts.Voices.FirstOrDefault(v => v.Name == options.Locale.Id);
+				if (voice != null)
+					tts.SetVoice(voice);
 			}
 
 			if (options?.Pitch.HasValue ?? false)
@@ -189,7 +197,11 @@ namespace Microsoft.Maui.Media
 
 			try
 			{
-				return tts.AvailableLanguages.Select(a => new Locale(a.Language, a.Country, a.DisplayName, string.Empty));
+				return tts.Voices.Select(a => new Locale(
+					a.Locale.Language,
+					a.Locale.Country,
+					a.Locale.DisplayName,
+					a.Name));
 			}
 			catch (Exception ex)
 			{
